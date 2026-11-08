@@ -25,7 +25,6 @@ st.markdown("""
     .stApp {
         background-color: #FAF7F2;
     }
-    /* Mobile Container Width */
     .block-container {
         padding-top: 1.2rem !important;
         padding-bottom: 3rem !important;
@@ -33,7 +32,6 @@ st.markdown("""
         padding-right: 0.8rem !important;
         max-width: 520px !important;
     }
-    /* Top Brand Header */
     .m-header {
         background: linear-gradient(135deg, #1A1817 0%, #2D241E 100%);
         color: #FFFFFF;
@@ -66,7 +64,6 @@ st.markdown("""
         color: #D8CFC4;
         margin-top: 2px;
     }
-    /* Custom Card UI */
     .sj-card {
         background: #FFFFFF;
         border-radius: 12px;
@@ -91,40 +88,6 @@ st.markdown("""
         border: 1px solid #F1D2CF;
         margin-bottom: 12px;
     }
-    /* Mobile 2x2 KPI Grid */
-    .m-grid-2x2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin: 10px 0;
-    }
-    .m-kpi-card {
-        background: #FFFFFF;
-        border-radius: 12px;
-        padding: 12px 14px;
-        border: 1px solid #E6DEC8;
-        border-top: 3px solid #CB994F;
-    }
-    .m-kpi-label {
-        font-size: 11.5px;
-        color: #6E655F;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-    .m-kpi-val {
-        font-size: 16px;
-        font-weight: 800;
-        color: #1A1817;
-        margin-top: 2px;
-        white-space: nowrap;
-    }
-    .m-kpi-delta {
-        font-size: 10.5px;
-        font-weight: 700;
-        margin-top: 2px;
-        white-space: nowrap;
-    }
-    /* Progress Bar */
     .sj-prog-bg {
         background-color: #EFECE6;
         border-radius: 6px;
@@ -150,15 +113,15 @@ st.markdown("""
         border: 1px solid #E2D9C8;
     }
     button[data-baseweb="tab"] {
-        font-size: 13px !important;
+        font-size: 12px !important;
         font-weight: 700 !important;
-        padding: 8px 6px !important;
+        padding: 8px 3px !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. EMBEDDED 28-PAGE SUPPLEMENTARY MANUAL DATABASE (26.06.15 최신화)
+# 2. EMBEDDED 28-PAGE SUPPLEMENTARY MANUAL DATABASE
 # ==============================================================================
 MANUAL_DB = {
     "가브리보쌈(준비) & 제공중량": {
@@ -251,9 +214,7 @@ MANUAL_DB = {
             "냉국수: 미나리 줄기 50g + 동치미 냉면육수 2개 + 냉동소면 1개",
             "미나리무침: 미나리 잎 40g + 초무침 10g + 가브리보쌈 35g + 참기름 2g"
         ],
-        "steps": [
-            "줄기(0.3cm 세절)는 냉국수에, 잎(4cm 절단)은 무침에 분리 사용하여 폐기율 0% 유지"
-        ],
+        "steps": ["줄기(0.3cm 세절)는 냉국수에, 잎(4cm 절단)은 무침에 분리 사용하여 폐기율 0% 유지"],
         "caution": "부위별 용도 엄수"
     },
     "맵불스지": {
@@ -268,19 +229,6 @@ MANUAL_DB = {
             "웍에 소스+정제수 끓인 뒤 스지+파스타면 넣고 3분간 끓여 플레이팅"
         ],
         "caution": "계란 즉시 냉각하지 않으면 탈각 시 파손 발생"
-    },
-    "오징어 초무침 / 문어 슬라이스 / 부추 호박전 / 오이탕탕이": {
-        "category": "사이드/별미",
-        "updated": "26.04.20 / 26.06.15 수정",
-        "summary": "저녁 주류 안주 및 사이드 메뉴 4종 초간단 조리 규격",
-        "specs": [
-            "오징어초무침: 야채+초무침소스 무침 후 깻잎+오징어(데침 30초)+콩가루 토핑",
-            "문어슬라이스: 자숙문어다리 1개 슬라이스 + 초대리밥 220g + 기름장/초장/와사비",
-            "부추호박전: 부추전 반죽 + 애호박 40g 올려 양면 바삭하게 구워 제공",
-            "오이탕탕이: 오이 200g(접시로 눌러 부숨) + 오이소스 15g 버무림"
-        ],
-        "steps": ["오이탕탕이 조리 시 칼등 가격 금지 (반드시 위생비닐+접시 이용)"],
-        "caution": "사이드 메뉴는 3분 이내 조리 제공"
     },
     "육수 제조 & 염도 관리": {
         "category": "소분/육수/소스",
@@ -302,32 +250,11 @@ MANUAL_DB = {
         ],
         "steps": ["끓인 식용유 부을 때 화상 주의"],
         "caution": "얼큰다대기는 당일 즉석 사용 금지 (반드시 1일 숙성)"
-    },
-    "배추 절이기 & 굴 세척·보관 위생": {
-        "category": "보쌈/핵심전처리",
-        "updated": "26.01.21 / 25.11.13 수정",
-        "summary": "소금물 재사용법 및 굴 3.0% 염도 소분 보관법",
-        "specs": [
-            "배추 3통 절인 후 남은 소금물 버리지 않고 알배추 2박스 절임에 재사용",
-            "굴 보관: 물 2,000ml + 천일염 70g (염도 3.0%) ➔ [굴 200g + 소금물 200g] 소분 후 얼음물 바트 보관"
-        ],
-        "steps": ["마감 시 얼음물 교체 필수"],
-        "caution": "패각 및 갯지렁이 혼입 주의"
-    },
-    "점심 기본반찬 4종 대량조리": {
-        "category": "반찬/국",
-        "updated": "26.04.30 / 25.12.17 수정",
-        "summary": "어묵볶음·콩나물무침·소세지볶음·콩나물국 대량 표준 레시피",
-        "specs": [
-            "콩나물국: 물 12L + 해물농축액 500ml + 콩나물 1kg (끓기 전 염도 0.65 ➔ 끓인 후 염도 0.85)"
-        ],
-        "steps": ["점심 예상 매출에 맞춰 조리량 조절하여 잔반 최소화"],
-        "caution": "콩나물국 염도 준수"
     }
 }
 
 # ==============================================================================
-# 3. REAL-TIME EXCEL ENGINE (FIXES FORMULA CACHE SHIFT)
+# 3. REAL-TIME EXCEL ENGINE
 # ==============================================================================
 @st.cache_data
 def load_and_recalculate_all():
@@ -339,7 +266,7 @@ def load_and_recalculate_all():
     ]
     file_path = next((c for c in candidates if os.path.exists(c)), None)
     if file_path is None:
-        st.error("엑셀 데이터 파일을 찾을 수 없습니다. 폴더 내 엑셀 파일명을 확인해 주세요.")
+        st.error("엑셀 데이터 파일('cost_data.xlsx')을 찾을 수 없습니다. 폴더 내 파일명을 확인해 주세요.")
         st.stop()
 
     df_db_full = pd.read_excel(file_path, sheet_name="01_식재료마스터DB", skiprows=3)
@@ -487,6 +414,12 @@ def load_and_recalculate_all():
 
 df_raw, df_sobun, sobun_items_dict, df_menu, menu_items_dict, menu_cat_breakdown = load_and_recalculate_all()
 
+# Session State for Image Uploads (메뉴별/소분별 업로드 사진 저장소)
+if "menu_photos" not in st.session_state:
+    st.session_state["menu_photos"] = {}
+if "sobun_photos" not in st.session_state:
+    st.session_state["sobun_photos"] = {}
+
 # ==============================================================================
 # 4. MOBILE APP HEADER & NAVIGATION TABS
 # ==============================================================================
@@ -494,23 +427,23 @@ st.markdown("""
 <div class="m-header">
     <div class="m-badge">手:情 (손정) · MOBILE PORTAL</div>
     <div class="m-title">🥩 손정보쌈 가맹점 통합 진단 포털</div>
-    <div class="m-sub">28P 조리 보완매뉴얼 · 127종 식자재 DB · 실매출/원가 진단</div>
+    <div class="m-sub">28P 매뉴얼 · 멀티 배합기(1~10배) · 슈퍼바이저 처방 · 사진 업로드</div>
 </div>
 """, unsafe_allow_html=True)
 
 nav = st.tabs([
-    "📋 28P 매뉴얼·레시피",
+    "📋 매뉴얼·배합기",
     "🥩 메뉴원가 & DB",
     "🔍 실매출·원가 진단",
     "💰 월간 손익 P&L"
 ])
 
 # ==============================================================================
-# TAB 1: 📋 주방 보완매뉴얼 & 1인분 레시피 통합 뷰어
+# TAB 1: 📋 주방 보완매뉴얼 & 1배~10배 멀티 배합기 (사진 업로드 포함)
 # ==============================================================================
 with nav[0]:
-    st.markdown("##### 📖 주방 보완매뉴얼 & 20종 정량 레시피")
-    sub_t1, sub_t2 = st.tabs(["📌 28P 보완매뉴얼 가이드", "🍲 20종 메뉴별 정량 레시피"])
+    st.markdown("##### 📖 주방 보완매뉴얼 & 소스 멀티 배합기")
+    sub_t1, sub_t2 = st.tabs(["📌 28P 매뉴얼", "🧪 1~10배 멀티 배합기"])
 
     with sub_t1:
         sel_k = st.selectbox("조회할 조리·전처리 항목 선택", list(MANUAL_DB.keys()))
@@ -520,7 +453,7 @@ with nav[0]:
             <span class="sj-tag">{m_data['category']}</span>
             <span class="sj-tag">{m_data['updated']}</span>
             <h4 style="margin:8px 0 4px 0;">{sel_k}</h4>
-            <p style="color:#5C4938; font-size:13px; margin-bottom:0;">{m_data['summary']}</p>
+            <p style="color:#5C4938; font-size:12.5px; margin-bottom:0;">{m_data['summary']}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -529,69 +462,83 @@ with nav[0]:
             st.markdown(f"- {s}")
 
         st.markdown("###### ⏱️ 표준 조리 타임라인")
-        for idx, st_txt in enumerate(m_data["steps"]):
-            st.markdown(f"""<div style='padding:8px 10px; background:#FFF; border-radius:8px; margin-bottom:6px; border:1px solid #E6DEC8; font-size:12.5px;'>{st_txt}</div>""", unsafe_allow_html=True)
-
-        st.markdown(f"""
-        <div class="sj-card-alert" style="font-size:12.5px;">
-            <b>⚠️ QSC 주의사항:</b> {m_data['caution']}
-        </div>
-        """, unsafe_allow_html=True)
+        for st_txt in m_data["steps"]:
+            st.markdown(f"""<div style='padding:8px 10px; background:#FFF; border-radius:8px; margin-bottom:6px; border:1px solid #E6DEC8; font-size:12px;'>{st_txt}</div>""", unsafe_allow_html=True)
 
     with sub_t2:
-        chosen_menu = st.selectbox("조회할 메뉴 선택", df_menu["메뉴명"].tolist())
-        m_row = df_menu[df_menu["메뉴명"] == chosen_menu].iloc[0]
+        chosen_sobun = st.selectbox("소분/소스/육수 레시피 선택", df_sobun["소분명"].tolist())
+        batch_mult = st.slider("배합 배수 선택 (1배 ~ 10배 대량 조리 환산)", 1, 10, 1)
+
+        sb_row = df_sobun[df_sobun["소분명"] == chosen_sobun].iloc[0]
         st.markdown(f"""
         <div class="sj-card-gold">
-            <b style="font-size:16px;">{chosen_menu}</b> ({m_row['카테고리']})<br>
-            판매가: <b>{int(m_row['적용판매가']):,}원</b> | 1인분 총원가: <b style="color:#8C1D18;">{int(m_row['1인분총원가']):,}원 ({m_row['원가율(%)']:.1f}%)</b>
+            <b>{chosen_sobun} — {batch_mult}배합 기준 환산표</b><br>
+            총 투입중량: <b>{sb_row['총투입중량(g)']*batch_mult:,.0f}g</b> | 최종 완성: <b>{sb_row['최종완성중량(g)']*batch_mult:,.0f}g</b><br>
+            <span style="color:#8C1D18; font-weight:800;">총 배합원가: {sb_row['1회배합총원가(원)']*batch_mult:,.0f}원</span> (1g당 {sb_row['1g당실원가(원)']:.2f}원)
         </div>
         """, unsafe_allow_html=True)
 
-        for it in menu_items_dict[chosen_menu]:
-            share = it["원가비중(%)"]
-            qty_str = f"{it['투입량']:,.0f}g(개)" if it["투입량"] > 0 else "중량 확인필요"
-            cost_str = f"{it['투입원가(원)']:,.0f}원 ({share:.1f}%)" if it["투입원가(원)"] > 0 else "0원"
+        for it in sobun_items_dict[chosen_sobun]:
+            item_cost = it["투입량(g)"] * batch_mult * it["1g단가(원)"]
             st.markdown(f"""
-            <div class="sj-card" style="padding:10px 14px; margin-bottom:8px;">
-                <div style="display:flex; justify-content:space-between; font-size:13px;">
-                    <div><span class="sj-tag">{it['구분']}</span> <b>{it['재료명']}</b></div>
-                    <div style="text-align:right;"><b>{qty_str}</b> | <b style="color:#8C1D18;">{cost_str}</b></div>
+            <div class="sj-card" style="padding:8px 12px; margin-bottom:6px; font-size:12.5px;">
+                <div style="display:flex; justify-content:space-between;">
+                    <div><span class="sj-tag">{it['품목코드']}</span> <b>{it['재료명']}</b></div>
+                    <div><b>{it['투입량(g)']*batch_mult:,.1f}g</b> | <b style="color:#8C1D18;">{item_cost:,.0f}원</b></div>
                 </div>
-                <div class="sj-prog-bg"><div class="sj-prog-fill" style="width:{min(share, 100):.1f}%;"></div></div>
             </div>
             """, unsafe_allow_html=True)
 
+        # 🧪 프랩/소스 사진 업로드 및 미리보기 영역
+        st.markdown("###### 📸 소스·프랩 제조 완성 컷 업로드")
+        uploaded_sobun_img = st.file_uploader(f"[{chosen_sobun}] 완성 사진 업로드", type=["jpg", "png", "jpeg"], key=f"sobun_up_{chosen_sobun}")
+        if uploaded_sobun_img is not None:
+            st.session_state["sobun_photos"][chosen_sobun] = uploaded_sobun_img
+        if chosen_sobun in st.session_state["sobun_photos"]:
+            st.image(st.session_state["sobun_photos"][chosen_sobun], caption=f"[{chosen_sobun}] 등록된 현장 사진", use_container_width=True)
+
 # ==============================================================================
-# TAB 2: 🥩 메뉴원가율 & 식자재 DB
+# TAB 2: 🥩 메뉴원가 & 사진 업로드 프리뷰
 # ==============================================================================
 with nav[1]:
-    st.markdown("##### 🥩 20종 메뉴 원가율 신호등 & 127종 식자재 DB")
-    for _, row in df_menu.iterrows():
-        r_pct = row["원가율(%)"]
-        status_color = "#2E6F40" if r_pct <= 25 else ("#CB994F" if r_pct <= 30 else "#B8332A")
-        status_text = "🟢 우수" if r_pct <= 25 else ("🟡 적정" if r_pct <= 30 else "🔴 주의")
+    st.markdown("##### 🥩 20종 메뉴별 정량 레시피 & 사진 등록")
+    chosen_menu = st.selectbox("조회할 메뉴 선택", df_menu["메뉴명"].tolist())
+    m_row = df_menu[df_menu["메뉴명"] == chosen_menu].iloc[0]
+
+    st.markdown(f"""
+    <div class="sj-card-gold">
+        <b style="font-size:16px;">{chosen_menu}</b> ({m_row['카테고리']})<br>
+        판매가: <b>{int(m_row['적용판매가']):,}원</b> | 1인분 총원가: <b style="color:#8C1D18;">{int(m_row['1인분총원가']):,}원 ({m_row['원가율(%)']:.1f}%)</b>
+    </div>
+    """, unsafe_allow_html=True)
+
+    for it in menu_items_dict[chosen_menu]:
+        share = it["원가비중(%)"]
+        qty_str = f"{it['투입량']:,.0f}g(개)" if it["투입량"] > 0 else "중량 확인필요"
+        cost_str = f"{it['투입원가(원)']:,.0f}원 ({share:.1f}%)" if it["투입원가(원)"] > 0 else "0원"
         st.markdown(f"""
         <div class="sj-card" style="padding:10px 14px; margin-bottom:8px;">
-            <div style="display:flex; justify-content:space-between; font-size:13.5px;">
-                <div><span class="sj-tag">{row['메뉴번호']}</span> <b>{row['메뉴명']}</b></div>
-                <b style="color:{status_color};">{status_text} ({r_pct:.1f}%)</b>
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+                <div><span class="sj-tag">{it['구분']}</span> <b>{it['재료명']}</b></div>
+                <div style="text-align:right;"><b>{qty_str}</b> | <b style="color:#8C1D18;">{cost_str}</b></div>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:#5C4938; margin-top:4px;">
-                <span>판매가: {int(row['적용판매가']):,}원</span>
-                <span>원가: <b style="color:#8C1D18;">{int(row['1인분총원가']):,}원</b></span>
-                <span>마진: <b style="color:#2E6F40;">{int(row['1그릇당마진']):,}원</b></span>
-            </div>
+            <div class="sj-prog-bg"><div class="sj-prog-fill" style="width:{min(share, 100):.1f}%;"></div></div>
         </div>
         """, unsafe_allow_html=True)
 
+    # 📸 메뉴 플레이팅 사진 업로드 및 미리보기 영역
+    st.markdown("###### 📸 메뉴 플레이팅 컷 업로드")
+    uploaded_menu_img = st.file_uploader(f"[{chosen_menu}] 플레이팅 사진 업로드", type=["jpg", "png", "jpeg"], key=f"menu_up_{chosen_menu}")
+    if uploaded_menu_img is not None:
+        st.session_state["menu_photos"][chosen_menu] = uploaded_menu_img
+    if chosen_menu in st.session_state["menu_photos"]:
+        st.image(st.session_state["menu_photos"][chosen_menu], caption=f"[{chosen_menu}] 등록된 메뉴 플레이팅 컷", use_container_width=True)
+
 # ==============================================================================
-# TAB 3: 🔍 실제 매출·원가 차이(Variance) 정밀 진단기
+# TAB 3: 🔍 실제 매출·원가 진단기 + 손정보쌈 슈퍼바이저 처방 리포트
 # ==============================================================================
 with nav[2]:
-    st.markdown("##### 🔍 당월 실제 매출 vs 실사용 원가 누수 진단")
-    st.caption("가맹점에서 판매된 총매출과 물류업체 매입 + 개인 사입(마트/시장) 금액을 대조하여 원가 누수 부위를 색출합니다.")
-
+    st.markdown("##### 🔍 실매출 vs 실사용 원가 누수 진단")
     default_sales_qty = [380, 140, 260, 220, 45, 0, 190, 0, 0, 0, 160, 110, 85, 130, 65, 90, 120, 95, 150, 110]
     pos_df = pd.DataFrame({
         "메뉴명": df_menu["메뉴명"],
@@ -600,12 +547,8 @@ with nav[2]:
         "월판매수량": default_sales_qty
     })
 
-    with st.expander("📦 당월 메뉴별 판매 수량 수정 (터치하여 열기)", expanded=False):
-        edited_pos = st.data_editor(
-            pos_df[["메뉴명", "월판매수량"]],
-            column_config={"메뉴명": st.column_config.TextColumn("메뉴명", disabled=True)},
-            hide_index=True, use_container_width=True, height=250
-        )
+    with st.expander("📦 메뉴별 월 판매량 수정 (터치)", expanded=False):
+        edited_pos = st.data_editor(pos_df[["메뉴명", "월판매수량"]], hide_index=True, use_container_width=True, height=220)
     pos_df["월판매수량"] = edited_pos["월판매수량"]
 
     food_rev = float((pos_df["실판매가(원)"] * pos_df["월판매수량"]).sum())
@@ -623,7 +566,7 @@ with nav[2]:
     theo_cat_totals["포장/소모품"] += food_rev * 0.022
     total_theo_cost = sum(theo_cat_totals.values())
 
-    with st.expander("🛒 품목군별 실제 매입액(물류+개인사입) 입력 (터치하여 열기)", expanded=False):
+    with st.expander("🛒 품목군별 실제 매입액(물류+개인사입) 입력 (터치)", expanded=False):
         spend_input_df = pd.DataFrame({
             "품목군": list(theo_cat_totals.keys()),
             "물류업체매입(원)": [int(v*1.08) for v in theo_cat_totals.values()],
@@ -644,10 +587,25 @@ with nav[2]:
         <h4 style="margin:0 0 6px 0; color:#8C1D18;">🔍 당월 실매출·원가 진단 요약</h4>
         <div style="font-size:13px; line-height:1.6;">
         - 총매출 (음식+주류): <b>{int(total_actual_rev):,}원</b><br>
-        - POS 표준원가: <b>{int(total_theo_cost):,}원</b> ({(total_theo_cost/total_actual_rev*100):.1f}%)<br>
-        - 실제 사용원가: <b style="color:#8C1D18;">{int(total_actual_cost):,}원</b> ({(total_actual_cost/total_actual_rev*100):.1f}%)<br>
+        - 표준원가: <b>{int(total_theo_cost):,}원</b> ({(total_theo_cost/total_actual_rev*100):.1f}%)<br>
+        - 실제원가: <b style="color:#8C1D18;">{int(total_actual_cost):,}원</b> ({(total_actual_cost/total_actual_rev*100):.1f}%)<br>
         - <b>원가 누수 차액: <span style="color:#B8332A;">{int(total_variance):+,}원</span></b>
         </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 손정보쌈 슈퍼바이저 종합 결론 리포트 (통합 복원)
+    st.markdown("##### 📋 손정보쌈 슈퍼바이저 종합 결론 리포트")
+    sorted_var = edited_spend.sort_values("실제사용", ascending=False)
+    worst_item = sorted_var.iloc[0]["품목군"]
+
+    st.markdown(f"""
+    <div class="sj-card-alert">
+        <b>🚨 손정보쌈 슈퍼바이저 현장 개선 처방전:</b><br>
+        당월 분석 결과, 표준 원가 대비 가장 원가 누수가 심한 항목은 <b>[{worst_item}]</b> 파트입니다.<br>
+        1. <b>정량 계량 준수</b>: 보쌈 및 해산물 조리 시 전자저울을 사용하여 오버포셔닝(과다 제공)을 방지하십시오.<br>
+        2. <b>배추 절임물 재사용</b>: 배추 3통 절임 후 남은 소금물을 버리지 말고 알배추 2박스 절임에 재사용하여 부재료비를 절감하십시오.<br>
+        3. <b>로스 관리</b>: 미나리는 줄기(냉국수)와 잎(무침)을 분리 사용하여 폐기율을 0%로 유지하십시오.
     </div>
     """, unsafe_allow_html=True)
 
@@ -677,15 +635,10 @@ with nav[3]:
     np_col = "#2E6F40" if net_p > 0 else "#B8332A"
 
     st.markdown(f"""
-    <div class="m-grid-2x2" style="margin-top:10px;">
-        <div class="m-kpi-card"><div class="m-kpi-label">월 총매출액</div><div class="m-kpi-val">{int(m_rev):,}원</div></div>
-        <div class="m-kpi-card"><div class="m-kpi-label">식자재원가+수수료</div><div class="m-kpi-val" style="color:#8C1D18;">{int(m_cost+m_comm):,}원</div></div>
-        <div class="m-kpi-card"><div class="m-kpi-label">월 고정비 합계</div><div class="m-kpi-val">{int(total_fixed):,}원</div></div>
-        <div class="m-kpi-card" style="border-top: 3px solid {np_col}; background:#FFFDF9;">
-            <div class="m-kpi-label">💰 월 최종 순수익</div>
-            <div class="m-kpi-val" style="color:{np_col};">{int(net_p):,}원</div>
-            <div class="m-kpi-delta" style="color:{np_col};">순이익률 {net_rate:.1f}%</div>
-        </div>
+    <div style="background:#FFF; padding:14px; border-radius:12px; border:1px solid #E6DEC8; margin-top:10px;">
+        <div style="font-size:13px; color:#6E655F;">💰 사장님 월 최종 세전 순수익</div>
+        <div style="font-size:22px; font-weight:800; color:{np_col}; margin-top:4px;">{int(net_p):,}원 (순이익률 {net_rate:.1f}%)</div>
+        <div style="font-size:11.5px; color:#5C4938; margin-top:4px;">매출총이익 {int(gross_p):,}원 - 고정비 {int(total_fixed):,}원</div>
     </div>
     """, unsafe_allow_html=True)
 # --- END OF FILE ---
