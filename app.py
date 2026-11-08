@@ -1,7 +1,9 @@
 import os
+import math
 import streamlit as st
 import pandas as pd
 import numpy as np
+import openpyxl
 
 # 1. 모바일 전용 페이지 설정 (centered 레이아웃 및 사이드바 접기)
 st.set_page_config(
@@ -23,7 +25,6 @@ st.markdown("""
     .stApp {
         background-color: #FAF7F2;
     }
-    /* 모바일 상단 여백 및 최대 폭 최적화 */
     .block-container {
         padding-top: 1.2rem !important;
         padding-bottom: 2.5rem !important;
@@ -31,7 +32,6 @@ st.markdown("""
         padding-right: 0.8rem !important;
         max-width: 520px !important;
     }
-    /* 모바일 상단 브랜드 헤더 */
     .m-header {
         background: linear-gradient(135deg, #1A1817 0%, #2D241E 100%);
         color: #FFFFFF;
@@ -64,7 +64,6 @@ st.markdown("""
         color: #D8CFC4;
         margin-top: 2px;
     }
-    /* 모바일 2x2 KPI 그리드 (세로로 길게 깨지지 않음) */
     .m-grid-2x2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -98,7 +97,6 @@ st.markdown("""
         margin-top: 2px;
         white-space: nowrap;
     }
-    /* 모바일용 한눈에 보기 리스트 카드 (한 줄 유지) */
     .m-list-card {
         background: #FFFFFF;
         border-radius: 12px;
@@ -139,7 +137,6 @@ st.markdown("""
         padding: 6px 10px;
         border-radius: 8px;
     }
-    /* 상단 탭 버튼 큼직하게 (엄지 터치 최적화) */
     button[data-baseweb="tab"] {
         font-size: 13.5px !important;
         font-weight: 700 !important;
@@ -150,34 +147,112 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    # 폴더 내 엑셀 파일 자동 감지
     candidates = [
-        "cost_data.xlsx",  # <-- 이 줄을 맨 위에 꼭 추가해 주세요!
+        "cost_data.xlsx",
         "손정보쌈_원가계산_가나다순정리_소분카드정렬_판매가반영.xlsx",
         "손정보쌈_원가계산_레시피입력완성.xlsx",
         "손정보쌈_원가계산_보완매뉴얼반영-v2.xlsx"
     ]
     file_path = next((c for c in candidates if os.path.exists(c)), candidates[0])
 
-    # 1) 03_메뉴별원가계산서 요약표 로드
-    df_menu_summary = pd.read_excel(file_path, sheet_name="03_메뉴별원가계산서", skiprows=4, nrows=20)
-    df_menu_summary = df_menu_summary.iloc[:, [0, 1, 2, 3, 4, 5, 6, 7, 8]]
-    df_menu_summary.columns = ["번호", "카테고리", "메뉴명", "현재판매가", "1인분총원가", "현재원가율", "1그릇당마진", "목표원가율", "권장판매가"]
-    df_menu_summary = df_menu_summary.dropna(subset=["메뉴명"]).copy()
+    # 엑셀 캐시값이 없어도 원본 카드에서 직접 원가를 계산하도록 설계
+    wb = openpyxl.load_workbook(file_path, data_only=False)
+    ws1 = wb["01_식재료마스터DB"]
+    ws2 = wb["02_소분및배합레시피"]
+    ws3 = wb["03_메뉴별원가계산서"]
+    ws4 = wb["04_수익률및마진분석"]
 
-    for col in ["현재판매가", "1인분총원가", "현재원가율", "1그릇당마진", "목표원가율", "권장판매가"]:
-        df_menu_summary[col] = pd.to_numeric(df_menu_summary[col], errors="coerce").fillna(0)
+    # 1) 식재료 마스터 DB에서 1g당 단가 산출
+    unit_cost_map = {}
+    for r in range(5, 155):
+        name = ws1.cell(r, 3).value
+        if name:
+            name = str(name).strip()
+            w = float(ws1.cell(r, 4).value or 0)
+            p = float(ws1.cell(r, 5).value or 0)
+            y_val = ws1.cell(r, 6).value
+            y = float(y_val if y_val is not None else 1.0)
+            usable = w * y
+            unit_cost_map[name] = (p / usable) if usable > 0 else 0.0
 
-    # 2) 04_수익률및마진분석 시트 로드
-    df_profit = pd.read_excel(file_path, sheet_name="04_수익률및마진분석", skiprows=4, nrows=20)
-    df_profit = df_profit.iloc[:, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]]
-    df_profit.columns = ["번호", "메뉴명", "현재판매가", "식재료원가", "원가율", "배달수수료율", "순마진", "월판매수량", "월매출액", "월원가합계", "월순마진기여액", "원가진단"]
-    df_profit = df_profit.dropna(subset=["메뉴명"]).copy()
+    # 2) 소분 및 배합 레시피(30종)에서 1g당 제조실원가 산출 (다단계 배합 대응을 위해 3회 반복)
+    for _ in range(3):
+        for i in range(30):
+            header_r = 37 + 17 * i
+            prep_name = ws2.cell(header_r, 3).value
+            if not prep_name:
+                continue
+            prep_name = str(prep_name).strip()
+            y_val = ws2.cell(header_r, 7).value
+            y = float(y_val if y_val is not None else 1.0)
 
-    for col in ["현재판매가", "식재료원가", "원가율", "배달수수료율", "월판매수량"]:
-        df_profit[col] = pd.to_numeric(df_profit[col], errors="coerce").fillna(0)
+            total_w, total_c = 0.0, 0.0
+            for item_r in range(header_r + 2, header_r + 14):
+                ing_name = ws2.cell(item_r, 3).value
+                qty = ws2.cell(item_r, 4).value
+                if ing_name and qty is not None:
+                    q = float(qty or 0)
+                    uc = unit_cost_map.get(str(ing_name).strip(), 0.0)
+                    total_w += q
+                    total_c += q * uc
+            final_w = total_w * y
+            unit_cost_map[prep_name] = (total_c / final_w) if final_w > 0 else 0.0
 
-    return df_menu_summary, df_profit
+    # 3) 메뉴별 원가계산서(20종) 카드 직접 파싱
+    menu_rows, profit_rows = [], []
+    for i in range(20):
+        header_r = 27 + 17 * i
+        num_label = ws3.cell(header_r, 1).value
+        cat = ws3.cell(header_r, 2).value or "기타"
+        m_name = ws3.cell(header_r, 3).value
+        if not m_name:
+            continue
+        m_name = str(m_name).strip()
+        sell_price = float(ws3.cell(header_r, 6).value or 0)
+        target_rate = float(ws3.cell(header_r, 8).value or 0.3)
+
+        total_cost = 0.0
+        for item_r in range(header_r + 2, header_r + 14):
+            ing_name = ws3.cell(item_r, 3).value
+            qty = ws3.cell(item_r, 4).value
+            if ing_name and qty is not None:
+                q = float(qty or 0)
+                uc = unit_cost_map.get(str(ing_name).strip(), 0.0)
+                total_cost += q * uc
+
+        cost_rate = (total_cost / sell_price) if sell_price > 0 else 0.0
+        margin = sell_price - total_cost
+        rec_price = math.ceil((total_cost / target_rate) / 100.0) * 100 if target_rate > 0 else 0
+
+        p_row = 6 + i
+        comm_val = ws4.cell(p_row, 6).value
+        qty_val = ws4.cell(p_row, 8).value
+        comm_rate = float(comm_val) if isinstance(comm_val, (int, float)) else 0.0
+        monthly_qty = float(qty_val) if isinstance(qty_val, (int, float)) else 0.0
+
+        menu_rows.append({
+            "번호": num_label,
+            "카테고리": str(cat).strip(),
+            "메뉴명": m_name,
+            "현재판매가": sell_price,
+            "1인분총원가": total_cost,
+            "현재원가율": cost_rate,
+            "1그릇당마진": margin,
+            "목표원가율": target_rate,
+            "권장판매가": rec_price
+        })
+
+        profit_rows.append({
+            "번호": num_label,
+            "메뉴명": m_name,
+            "현재판매가": sell_price,
+            "식재료원가": total_cost,
+            "원가율": cost_rate,
+            "배달수수료율": comm_rate,
+            "월판매수량": monthly_qty
+        })
+
+    return pd.DataFrame(menu_rows), pd.DataFrame(profit_rows)
 
 df_menu, df_profit = load_data()
 
@@ -190,7 +265,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 사이드바 대신 모바일 상단 터치 탭 사용
 tab1, tab2, tab3 = st.tabs([
     "📋 1인분 원가",
     "💰 순익 계산기",
@@ -198,7 +272,7 @@ tab1, tab2, tab3 = st.tabs([
 ])
 
 # ==============================================================================
-# TAB 1: 📋 1인분 표준 원가 조회 (모바일 2x2 카드 & 한줄 리스트)
+# TAB 1: 📋 1인분 표준 원가 조회
 # ==============================================================================
 with tab1:
     menu_names = df_menu["메뉴명"].tolist()
@@ -219,7 +293,6 @@ with tab1:
     else:
         status_txt, status_col, bg_col = "🔴 관리필요 (30% 초과)", "#B8332A", "#FEE2E2"
 
-    # 모바일 2x2 그리드 카드 (세로로 길어지지 않고 한 화면에 딱 맞게 표시)
     st.markdown(f"""
     <div class="m-grid-2x2">
         <div class="m-kpi-card">
@@ -279,13 +352,12 @@ with tab1:
         """, unsafe_allow_html=True)
 
 # ==============================================================================
-# TAB 2: 💰 월간 순수익 & 배달 수수료 시뮬레이터 (모바일 최적화)
+# TAB 2: 💰 월간 순수익 & 배달 수수료 시뮬레이터
 # ==============================================================================
 with tab2:
     st.markdown("##### 1️⃣ 수수료율 및 메뉴별 월 판매량 입력")
     comm_pct = st.slider("평균 결제/배달 수수료율 일괄 적용 (%)", min_value=0.0, max_value=30.0, value=6.5, step=0.5)
 
-    # 모바일 화면에 꽉 차도록 핵심 3열(메뉴명, 판매가, 월판매량)만 배치하여 가로 스크롤 방지
     mobile_sim_df = pd.DataFrame({
         "메뉴명": df_profit["메뉴명"],
         "현재판매가": df_profit["현재판매가"].astype(int),
@@ -305,14 +377,12 @@ with tab2:
         height=735
     )
 
-    # 매출 및 원가 합산
     total_revenue = float((user_edited["현재판매가"] * user_edited["월판매수량"]).sum())
     total_cost = float((mobile_sim_df["식재료원가"] * user_edited["월판매수량"]).sum())
     total_comm = total_revenue * (comm_pct / 100.0)
     gross_profit = total_revenue - total_cost - total_comm
     avg_cost_rate = (total_cost / total_revenue * 100.0) if total_revenue > 0 else 0.0
 
-    # 고정비 9개 항목 (모바일에서는 접이식 Expander에 넣어 스크롤 절약)
     st.markdown("##### 2️⃣ 매장 월 고정비 설정")
     with st.expander("⚙️ 월 고정비 9개 항목 상세 수정 (터치하여 열기)", expanded=False):
         f1 = st.number_input("1. 임대료 및 관리비 (월세·상가관리비)", value=550000, step=50000, format="%d")
@@ -327,65 +397,4 @@ with tab2:
 
     total_fixed = f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9
     net_profit = gross_profit - total_fixed
-    net_rate = (net_profit / total_revenue * 100.0) if total_revenue > 0 else 0.0
-
-    st.info(f"💡 현재 적용된 **월 고정비 총합계: {int(total_fixed):,}원** (위 버튼을 눌러 수정 가능)")
-
-    st.markdown("##### 📊 최종 월간 손익 산출 결과")
-    np_color = "#2E6F40" if net_profit > 0 else "#B8332A"
-    np_status = f"🟢 흑자 ({net_rate:.1f}%)" if net_profit > 0 else "🔴 적자 주의"
-
-    st.markdown(f"""
-    <div class="m-grid-2x2">
-        <div class="m-kpi-card">
-            <div class="m-kpi-label">월 예상 총매출액</div>
-            <div class="m-kpi-val">{int(total_revenue):,}원</div>
-            <div class="m-kpi-delta" style="color:#6E655F;">수수료 {int(total_comm):,}원</div>
-        </div>
-        <div class="m-kpi-card">
-            <div class="m-kpi-label">월 식재료 원가 합계</div>
-            <div class="m-kpi-val" style="color:#8C1D18;">{int(total_cost):,}원</div>
-            <div class="m-kpi-delta" style="color:#8C1D18;">평균 원가율 {avg_cost_rate:.1f}%</div>
-        </div>
-        <div class="m-kpi-card">
-            <div class="m-kpi-label">매장 매출총이익</div>
-            <div class="m-kpi-val">{int(gross_profit):,}원</div>
-            <div class="m-kpi-delta" style="color:#6E655F;">고정비 {int(total_fixed):,}원</div>
-        </div>
-        <div class="m-kpi-card" style="border-top: 3px solid {np_color}; background:#FFFDF9;">
-            <div class="m-kpi-label">💰 월 최종 세전 순수익</div>
-            <div class="m-kpi-val" style="color:{np_color};">{int(net_profit):,}원</div>
-            <div class="m-kpi-delta" style="color:{np_color};">{np_status}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# ==============================================================================
-# TAB 3: 📦 본사 전용상품 발주 가이드 (모바일 카드형)
-# ==============================================================================
-with tab3:
-    st.markdown("##### 📦 본사 필수 전용상품 발주 및 권장 재고 안내")
-    st.caption("원활한 매장 영업을 위해 아래 권장 안전재고 수량을 확인하여 여유 있게 발주해 주세요.")
-
-    scm_items = [
-        {"품목명": "가브리살 (정형 원육)", "공급형태": "본사필수", "포장규격": "1Box (10kg)", "최소발주수량": "1Box", "권장안전재고": "3Box"},
-        {"품목명": "손정 보쌈/볶음 분말소스", "공급형태": "본사필수", "포장규격": "1Box (1kg×6팩)", "최소발주수량": "1Box", "권장안전재고": "2Box"},
-        {"품목명": "진한 백사골육수 / 해물농축액", "공급형태": "본사필수", "포장규격": "1Box (2kg×5팩)", "최소발주수량": "1Box", "권장안전재고": "2Box"},
-        {"품목명": "무보쌈김치 / 지니김치양념", "공급형태": "본사필수", "포장규격": "1Box (5kg×2팩)", "최소발주수량": "1Box", "권장안전재고": "2Box"},
-        {"품목명": "손정 전용 포장용기", "공급형태": "본사필수", "포장규격": "1Box (1,000개입)", "최소발주수량": "1Box", "권장안전재고": "2Box"},
-    ]
-
-    for item in scm_items:
-        st.markdown(f"""
-        <div class="m-list-card">
-            <div class="m-list-top">
-                <div class="m-menu-name">{item['품목명']}</div>
-                <span class="m-status-pill" style="color:#8C1D18; background:#FEE2E2;">{item['공급형태']}</span>
-            </div>
-            <div class="m-list-bottom">
-                <span>규격: <b>{item['포장규격']}</b></span>
-                <span>최소주문: <b>{item['최소발주수량']}</b></span>
-                <span>권장재고: <b style="color:#2E6F40;">{item['권장안전재고']}</b></span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    net_rate = (net_
