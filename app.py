@@ -217,7 +217,7 @@ MANUAL_DB = {
         "steps": ["줄기(0.3cm 세절)는 냉국수에, 잎(4cm 절단)은 무침에 분리 사용하여 폐기율 0% 유지"],
         "caution": "부위별 용도 엄수"
     },
-    "맵불스지": {
+    "맵불ส지": {
         "category": "메인요리",
         "updated": "25.04.08 수정",
         "summary": "삶은 계란 12분 조리법 및 자숙스지+파스타면 3분 중불 조리",
@@ -414,11 +414,11 @@ def load_and_recalculate_all():
 
 df_raw, df_sobun, sobun_items_dict, df_menu, menu_items_dict, menu_cat_breakdown = load_and_recalculate_all()
 
-# Session State for Image Uploads (메뉴별/소분별 업로드 사진 저장소)
+# Session State for Image Uploads (메뉴별/매뉴얼별 업로드 사진 저장소)
 if "menu_photos" not in st.session_state:
     st.session_state["menu_photos"] = {}
-if "sobun_photos" not in st.session_state:
-    st.session_state["sobun_photos"] = {}
+if "manual_photos" not in st.session_state:
+    st.session_state["manual_photos"] = {}
 
 # ==============================================================================
 # 4. MOBILE APP HEADER & NAVIGATION TABS
@@ -427,7 +427,7 @@ st.markdown("""
 <div class="m-header">
     <div class="m-badge">手:情 (손정) · MOBILE PORTAL</div>
     <div class="m-title">🥩 손정보쌈 가맹점 통합 진단 포털</div>
-    <div class="m-sub">28P 매뉴얼 · 멀티 배합기(1~10배) · 슈퍼바이저 처방 · 사진 업로드</div>
+    <div class="m-sub">28P 매뉴얼(사진첨부) · 멀티 배합기(1~10배) · 슈퍼바이저 처방</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -439,11 +439,11 @@ nav = st.tabs([
 ])
 
 # ==============================================================================
-# TAB 1: 📋 주방 보완매뉴얼 & 1배~10배 멀티 배합기 (사진 업로드 포함)
+# TAB 1: 📋 주방 보완매뉴얼 (사진 업로드 포함) & 1배~10배 멀티 배합기
 # ==============================================================================
 with nav[0]:
     st.markdown("##### 📖 주방 보완매뉴얼 & 소스 멀티 배합기")
-    sub_t1, sub_t2 = st.tabs(["📌 28P 매뉴얼", "🧪 1~10배 멀티 배합기"])
+    sub_t1, sub_t2 = st.tabs(["📌 28P 매뉴얼 (사진첨부)", "🧪 1~10배 멀티 배합기"])
 
     with sub_t1:
         sel_k = st.selectbox("조회할 조리·전처리 항목 선택", list(MANUAL_DB.keys()))
@@ -464,6 +464,14 @@ with nav[0]:
         st.markdown("###### ⏱️ 표준 조리 타임라인")
         for st_txt in m_data["steps"]:
             st.markdown(f"""<div style='padding:8px 10px; background:#FFF; border-radius:8px; margin-bottom:6px; border:1px solid #E6DEC8; font-size:12px;'>{st_txt}</div>""", unsafe_allow_html=True)
+
+        # 📸 [이동됨] 매뉴얼 항목별 현장 작업 사진 업로드 및 미리보기 영역
+        st.markdown(f"###### 📸 [{sel_k}] 현장 조리·전처리 컷 업로드")
+        uploaded_manual_img = st.file_uploader(f"매뉴얼 사진 업로드", type=["jpg", "png", "jpeg"], key=f"manual_up_{sel_k}")
+        if uploaded_manual_img is not None:
+            st.session_state["manual_photos"][sel_k] = uploaded_manual_img
+        if sel_k in st.session_state["manual_photos"]:
+            st.image(st.session_state["manual_photos"][sel_k], caption=f"[{sel_k}] 등록된 현장 작업 컷", use_container_width=True)
 
     with sub_t2:
         chosen_sobun = st.selectbox("소분/소스/육수 레시피 선택", df_sobun["소분명"].tolist())
@@ -489,16 +497,8 @@ with nav[0]:
             </div>
             """, unsafe_allow_html=True)
 
-        # 🧪 프랩/소스 사진 업로드 및 미리보기 영역
-        st.markdown("###### 📸 소스·프랩 제조 완성 컷 업로드")
-        uploaded_sobun_img = st.file_uploader(f"[{chosen_sobun}] 완성 사진 업로드", type=["jpg", "png", "jpeg"], key=f"sobun_up_{chosen_sobun}")
-        if uploaded_sobun_img is not None:
-            st.session_state["sobun_photos"][chosen_sobun] = uploaded_sobun_img
-        if chosen_sobun in st.session_state["sobun_photos"]:
-            st.image(st.session_state["sobun_photos"][chosen_sobun], caption=f"[{chosen_sobun}] 등록된 현장 사진", use_container_width=True)
-
 # ==============================================================================
-# TAB 2: 🥩 메뉴원가 & 사진 업로드 프리뷰
+# TAB 2: 🥩 메뉴원가 & 플레이팅 사진 업로드
 # ==============================================================================
 with nav[1]:
     st.markdown("##### 🥩 20종 메뉴별 정량 레시피 & 사진 등록")
@@ -535,7 +535,7 @@ with nav[1]:
         st.image(st.session_state["menu_photos"][chosen_menu], caption=f"[{chosen_menu}] 등록된 메뉴 플레이팅 컷", use_container_width=True)
 
 # ==============================================================================
-# TAB 3: 🔍 실제 매출·원가 진단기 + 손정보쌈 슈퍼바이저 처방 리포트
+# TAB 3: 🔍 실제 매출·원가 진단기 + 슈퍼바이저 처방 리포트
 # ==============================================================================
 with nav[2]:
     st.markdown("##### 🔍 실매출 vs 실사용 원가 누수 진단")
@@ -594,7 +594,7 @@ with nav[2]:
     </div>
     """, unsafe_allow_html=True)
 
-    # 손정보쌈 슈퍼바이저 종합 결론 리포트 (통합 복원)
+    # 손정보쌈 슈퍼바이저 종합 결론 리포트
     st.markdown("##### 📋 손정보쌈 슈퍼바이저 종합 결론 리포트")
     sorted_var = edited_spend.sort_values("실제사용", ascending=False)
     worst_item = sorted_var.iloc[0]["품목군"]
