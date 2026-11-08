@@ -332,6 +332,7 @@ MANUAL_DB = {
 @st.cache_data
 def load_and_recalculate_all():
     candidates = [
+        "cost_data.xlsx",
         "손정보쌈_원가계산_가나다순정리_소분카드정렬_판매가반영.xlsx",
         "손정보쌈_원가계산_가나다순정리_소분카드정렬_판매가반영_2.xlsx",
         "손정보쌈_원가계산_레시피입력완성.xlsx"
