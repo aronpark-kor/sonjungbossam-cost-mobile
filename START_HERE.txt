@@ -1,0 +1,14 @@
+손정보쌈 Streamlit v3 실행 방법
+
+1. 이 폴더를 VS Code에서 '폴더 열기'로 엽니다.
+2. 터미널에서 아래 명령어 실행:
+   python -m pip install -r requirements.txt
+3. 설치 후 실행:
+   python -m streamlit run app.py
+
+파일 구성
+- app.py : 실행 코드
+- cost_data.xlsx : 원가/레시피 데이터
+- manual.pptx : 보완매뉴얼 원본
+- logo.jpg : 손정보쌈 로고
+- menu_images : 메뉴별 업로드 사진 저장 폴더
