@@ -3,10 +3,12 @@ import math
 import streamlit as st
 import pandas as pd
 import numpy as np
-import openpyxl
 
+# ==============================================================================
+# 1. PAGE CONFIG & MOBILE-OPTIMIZED BI DESIGN SYSTEM
+# ==============================================================================
 st.set_page_config(
-    page_title="손정보쌈 모바일 원가·손익 포털",
+    page_title="손정보쌈 | 가맹점 모바일 통합 진단 포털",
     page_icon="🥩",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -15,232 +17,674 @@ st.set_page_config(
 st.markdown("""
 <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-    html, body, [class*="css"] { font-family: 'Pretendard', sans-serif; background-color: #FAF7F2; color: #1A1817; }
-    .stApp { background-color: #FAF7F2; }
-    .block-container { padding: 1.2rem 0.8rem 2.5rem 0.8rem !important; max-width: 520px !important; }
-    .m-header { background: linear-gradient(135deg, #1A1817 0%, #2D241E 100%); color: #FFF; padding: 16px 18px; border-radius: 14px; border-bottom: 3px solid #CB994F; margin-bottom: 12px; }
-    .m-badge { display: inline-block; background: #CB994F; color: #1A1817; font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 12px; margin-bottom: 4px; }
-    .m-title { font-size: 19px; font-weight: 800; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .m-sub { font-size: 12px; color: #D8CFC4; margin-top: 2px; }
-    .m-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
-    .m-kpi-card { background: #FFF; border-radius: 12px; padding: 12px 14px; border: 1px solid #E6DEC8; border-top: 3px solid #CB994F; }
-    .m-kpi-label { font-size: 12px; color: #6E655F; font-weight: 600; white-space: nowrap; }
-    .m-kpi-val { font-size: 18px; font-weight: 800; color: #1A1817; margin-top: 3px; white-space: nowrap; }
-    .m-kpi-delta { font-size: 11px; font-weight: 700; margin-top: 2px; white-space: nowrap; }
-    .m-list-card { background: #FFF; border-radius: 12px; padding: 12px 14px; border: 1px solid #E6DEC8; margin-bottom: 8px; }
-    .m-list-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .m-menu-name { font-size: 15px; font-weight: 800; color: #1A1817; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .m-status-pill { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
-    .m-list-bottom { display: flex; justify-content: space-between; font-size: 12.5px; color: #5C4938; background: #FAF7F2; padding: 6px 10px; border-radius: 8px; }
-    button[data-baseweb="tab"] { font-size: 13.5px !important; font-weight: 700 !important; padding: 10px 8px !important; }
+    html, body, [class*="css"] {
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #FAF7F2;
+        color: #1A1817;
+    }
+    .stApp {
+        background-color: #FAF7F2;
+    }
+    /* Mobile Container Width */
+    .block-container {
+        padding-top: 1.2rem !important;
+        padding-bottom: 3rem !important;
+        padding-left: 0.8rem !important;
+        padding-right: 0.8rem !important;
+        max-width: 520px !important;
+    }
+    /* Top Brand Header */
+    .m-header {
+        background: linear-gradient(135deg, #1A1817 0%, #2D241E 100%);
+        color: #FFFFFF;
+        padding: 16px 18px;
+        border-radius: 14px;
+        border-bottom: 3px solid #CB994F;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .m-badge {
+        display: inline-block;
+        background-color: #CB994F;
+        color: #1A1817;
+        font-weight: 800;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-bottom: 4px;
+    }
+    .m-title {
+        font-size: 18px;
+        font-weight: 800;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .m-sub {
+        font-size: 11.5px;
+        color: #D8CFC4;
+        margin-top: 2px;
+    }
+    /* Custom Card UI */
+    .sj-card {
+        background: #FFFFFF;
+        border-radius: 12px;
+        padding: 14px 16px;
+        border: 1px solid #E6DEC8;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        margin-bottom: 12px;
+    }
+    .sj-card-gold {
+        background: #FFFDF9;
+        border-radius: 12px;
+        padding: 14px 16px;
+        border: 2px solid #CB994F;
+        box-shadow: 0 2px 8px rgba(203,153,79,0.1);
+        margin-bottom: 12px;
+    }
+    .sj-card-alert {
+        background: #FFF8F7;
+        border-radius: 12px;
+        padding: 14px 16px;
+        border-left: 5px solid #B8332A;
+        border: 1px solid #F1D2CF;
+        margin-bottom: 12px;
+    }
+    /* Mobile 2x2 KPI Grid */
+    .m-grid-2x2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin: 10px 0;
+    }
+    .m-kpi-card {
+        background: #FFFFFF;
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid #E6DEC8;
+        border-top: 3px solid #CB994F;
+    }
+    .m-kpi-label {
+        font-size: 11.5px;
+        color: #6E655F;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .m-kpi-val {
+        font-size: 16px;
+        font-weight: 800;
+        color: #1A1817;
+        margin-top: 2px;
+        white-space: nowrap;
+    }
+    .m-kpi-delta {
+        font-size: 10.5px;
+        font-weight: 700;
+        margin-top: 2px;
+        white-space: nowrap;
+    }
+    /* Progress Bar */
+    .sj-prog-bg {
+        background-color: #EFECE6;
+        border-radius: 6px;
+        height: 8px;
+        width: 100%;
+        overflow: hidden;
+        margin-top: 6px;
+    }
+    .sj-prog-fill {
+        background: linear-gradient(90deg, #CB994F 0%, #8C1D18 100%);
+        height: 100%;
+        border-radius: 6px;
+    }
+    .sj-tag {
+        display: inline-block;
+        background: #F4EFE6;
+        color: #5C4938;
+        font-weight: 600;
+        font-size: 11px;
+        padding: 2px 7px;
+        border-radius: 4px;
+        margin-right: 4px;
+        border: 1px solid #E2D9C8;
+    }
+    button[data-baseweb="tab"] {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        padding: 8px 6px !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
+# ==============================================================================
+# 2. EMBEDDED 28-PAGE SUPPLEMENTARY MANUAL DATABASE (26.06.15 최신화)
+# ==============================================================================
+MANUAL_DB = {
+    "가브리보쌈(준비) & 제공중량": {
+        "category": "보쌈/핵심전처리",
+        "updated": "25.10.28 수정",
+        "summary": "가브리살 해동·핏물제거·삶기(40분)·뜸들이기(20분) 및 점심/저녁 정량 기준",
+        "specs": [
+            "점심 보쌈정식(일반): 120g / 보쌈정식(특): 170g",
+            "한우사골칼국수 고기 토핑: 2~3점 (큰 고기 2점 / 작은 고기 3점)",
+            "저녁 가브리보쌈(小): 300g / 가브리보쌈(中): 400g / 보쌈추가(고기만): 200g",
+            "배합비 ① 가브리살 10kg 기준: 물 23kg + 보쌈분말 600g",
+            "배합비 ② 가브리살 5kg 기준: 물 11.5kg + 보쌈분말 300g (전날 미리 준비)"
+        ],
+        "steps": [
+            "1단계 (해동): 전날 가브리살 냉장 해동 진행",
+            "2단계 (핏물제거): 해동된 가브리살 1시간 이상 핏물 제거 작업 필수",
+            "3단계 (육수배합): 물 + 보쌈분말 정량 배합 후 끓이기",
+            "4단계 (삶기 - 40분): 보쌈육수가 끓어오르면 중불로 줄이고 고기 투입 후 40분간 삶기",
+            "5단계 (뜸들이기 - 20분): 불을 끄고 뚜껑을 덮은 상태로 20분간 뜸들이기",
+            "6단계 (건조/보관): 고기를 꺼내 상온에서 말린 후 진공 포장하여 보관"
+        ],
+        "caution": "삶기 시간(중불 40분) 및 뜸들이기(20분) 미준수 시 수율 급감 또는 육질 퍽퍽함 발생 주의"
+    },
+    "매콤알곤이볶음 & 맵기조절": {
+        "category": "메인요리",
+        "updated": "26.01.21 / 25.12.23 수정",
+        "summary": "통돌이 자동화기계 조리 타임라인(총 4분) 및 2단계 맵기(보통/매운맛) 표준화",
+        "specs": [
+            "1차 투입: 고추기름 30g(3바퀴), 간마늘 30g, 자숙알 180g, 자숙고니 360g, 고추 40g/대파 40g, 생콩나물 300g, 사골육수 200g",
+            "2차 투입: 볶음분말 100g(중량스푼 2스푼), 참기름 2바퀴",
+            "맵기 조절(보통맛): 캡사이신 넣지 않고 기존 조리방식 진행",
+            "맵기 조절(매운맛): 조리 완료 후 캡사이신 액상 5~6g 투입 (소형 스푼 '5' 표기선 1스푼)"
+        ],
+        "steps": [
+            "1단계 (초벌 볶음 - 2분): 1차 재료 모두 넣고 통돌이에서 2분간 조리",
+            "2단계 (분말 배합 - 1분 30초): 볶음분말 100g + 참기름 2바퀴 투입 후 1분 30초 조리",
+            "3단계 (직화 마무리 - 30초): 직화 30초 불향 입히기 후 달궈진 돌불판에 제공"
+        ],
+        "caution": "알곤이 찌기 전처리: 끓는 물 찜기에 해동된 알(3개)/곤이(6개)를 올리고 뚜껑 덮어 중불 50분 찐 후 상온 건조"
+    },
+    "알곤이 칼국수/전골 토핑 기준": {
+        "category": "점심/전골",
+        "updated": "26.04.20 수정",
+        "summary": "점심 1인분 및 얼큰칼국수전골(2인/3인) 알·곤이·콩나물·면 정량",
+        "specs": [
+            "1인분 기준: 자숙 알 50g + 자숙 곤이 120g",
+            "전골 2인분 기준: 알 100g + 곤이 240g + 콩나물 120g + 칼국수면 400g(2개)",
+            "전골 3인분 기준: 알 150g + 곤이 360g + 콩나물 180g + 칼국수면 600g(3개)"
+        ],
+        "steps": [
+            "1단계: 사골육수(염도 0.85%) 정량 투입 후 얼큰다대기 풀기",
+            "2단계: 인분 수에 맞춰 사전 소분된 자숙 알·곤이와 콩나물, 칼국수면 정량 세팅"
+        ],
+        "caution": "알·곤이 과다 투입 시 해산물 원가율 급등하므로 소분 박스 정량 준수"
+    },
+    "알곤이 치즈 파스타": {
+        "category": "사이드/별미",
+        "updated": "26.01.04 수정",
+        "summary": "파스타면 7인분 사전 삶기 소분(150g) 및 마무리 치즈 토치 조리법",
+        "specs": [
+            "파스타 삶기(7인분): 물 4,000ml + 파스타면 500g(1봉) + 식용유 50g(1국자) ➔ 7분간 삶기",
+            "1인분 조리: 남은 알곤이 소스 + 소분 파스타 1봉(150g) + 사골육수 50ml + 치즈 50g"
+        ],
+        "steps": [
+            "1단계: 끓는 물에 면 7분 삶은 뒤 식용유에 버무려 위생백 150g씩 소분 (냉장 5일)",
+            "2단계: 팬에 소스 + 면 + 사골육수 넣고 중불에서 볶기",
+            "3단계: 돌판에 담고 치즈 50g 덮은 뒤 토치로 갈색 그을음 내어 제공"
+        ],
+        "caution": "제공 시 '치즈가 잘 녹도록 잘 저어 드세요' 안내 멘트 필수"
+    },
+    "꼬막 비빔밥": {
+        "category": "점심/식사",
+        "updated": "26.06.15 수정",
+        "summary": "냉동 꼬막 100g 소분(해동 후 80g 수율) 및 정식 접시 플레이팅 표준",
+        "specs": [
+            "1인분 재료: 자숙꼬막 80g, 꼬막비빔장 50g, 미나리 20g, 계란지단 20g, 공깃밥 1ea, 김가루 5g, 참기름 10g, 깨 1g"
+        ],
+        "steps": [
+            "1단계: 꼬막 찬물에 30초 세척·해동 후 물기 제거",
+            "2단계: 접시에 꼬막 80g, 미나리 20g, 지단 20g 담고 비빔장 50g 올리기",
+            "3단계: 면기에 밥 + 참기름 + 김가루 담아 함께 제공"
+        ],
+        "caution": "해동 후 물기 불충분 시 비빔장이 묽어짐"
+    },
+    "미나리 냉국수 & 미나리 무침": {
+        "category": "점심/사이드",
+        "updated": "26.04.27 수정",
+        "summary": "미나리 부위별 분리 사용(줄기=냉국수 / 잎=무침)으로 식자재 로스 제로화",
+        "specs": [
+            "냉국수: 미나리 줄기 50g + 동치미 냉면육수 2개 + 냉동소면 1개",
+            "미나리무침: 미나리 잎 40g + 초무침 10g + 가브리보쌈 35g + 참기름 2g"
+        ],
+        "steps": [
+            "줄기(0.3cm 세절)는 냉국수에, 잎(4cm 절단)은 무침에 분리 사용하여 폐기율 0% 유지"
+        ],
+        "caution": "부위별 용도 엄수"
+    },
+    "맵불스지": {
+        "category": "메인요리",
+        "updated": "25.04.08 수정",
+        "summary": "삶은 계란 12분 조리법 및 자숙스지+파스타면 3분 중불 조리",
+        "specs": [
+            "1인분 재료: 자숙스지 230g, 맵불스지소스 250g, 정제수 250g, 파스타면 150g, 대파 10g, 삶은계란 1개"
+        ],
+        "steps": [
+            "계란은 물이 끓은 후 중불 12분 삶아 즉시 찬물 냉각",
+            "웍에 소스+정제수 끓인 뒤 스지+파스타면 넣고 3분간 끓여 플레이팅"
+        ],
+        "caution": "계란 즉시 냉각하지 않으면 탈각 시 파손 발생"
+    },
+    "오징어 초무침 / 문어 슬라이스 / 부추 호박전 / 오이탕탕이": {
+        "category": "사이드/별미",
+        "updated": "26.04.20 / 26.06.15 수정",
+        "summary": "저녁 주류 안주 및 사이드 메뉴 4종 초간단 조리 규격",
+        "specs": [
+            "오징어초무침: 야채+초무침소스 무침 후 깻잎+오징어(데침 30초)+콩가루 토핑",
+            "문어슬라이스: 자숙문어다리 1개 슬라이스 + 초대리밥 220g + 기름장/초장/와사비",
+            "부추호박전: 부추전 반죽 + 애호박 40g 올려 양면 바삭하게 구워 제공",
+            "오이탕탕이: 오이 200g(접시로 눌러 부숨) + 오이소스 15g 버무림"
+        ],
+        "steps": ["오이탕탕이 조리 시 칼등 가격 금지 (반드시 위생비닐+접시 이용)"],
+        "caution": "사이드 메뉴는 3분 이내 조리 제공"
+    },
+    "육수 제조 & 염도 관리": {
+        "category": "소분/육수/소스",
+        "updated": "26.05.12 수정",
+        "summary": "백사골육수(0.85%) 및 해물탕육수(0.88%) 표준 배합과 필수 염도",
+        "specs": [
+            "백사골육수 (23그릇): 진한백사골 2kg + 정제수 17kg ➔ 염도 0.85% 필수",
+            "해물탕육수 (14그릇): 해물농축액 1L + 정제수 20L ➔ 염도 0.88% 필수"
+        ],
+        "steps": ["주걱 눈금선에 맞춰 물을 맞춘 뒤 농축액 투입, 염도계로 수치 확인"],
+        "caution": "사골육수는 끓이기 전·후 2회 염도 측정 필수"
+    },
+    "다대기·간장·쌈장·김치속 대량 배합표": {
+        "category": "소분/육수/소스",
+        "updated": "26.01.28 / 26.02.28 수정",
+        "summary": "김치속, 얼큰/해물 다대기, 간장·새우젓·쌈장 표준 배합",
+        "specs": [
+            "얼큰다대기: 분말 3kg + 후추 60g + 굴소스 360g + 마늘 500g + 생강 200g + 끓인 식용유 450g (전날 제조 후 1일 냉장숙성)"
+        ],
+        "steps": ["끓인 식용유 부을 때 화상 주의"],
+        "caution": "얼큰다대기는 당일 즉석 사용 금지 (반드시 1일 숙성)"
+    },
+    "배추 절이기 & 굴 세척·보관 위생": {
+        "category": "보쌈/핵심전처리",
+        "updated": "26.01.21 / 25.11.13 수정",
+        "summary": "소금물 재사용법 및 굴 3.0% 염도 소분 보관법",
+        "specs": [
+            "배추 3통 절인 후 남은 소금물 버리지 않고 알배추 2박스 절임에 재사용",
+            "굴 보관: 물 2,000ml + 천일염 70g (염도 3.0%) ➔ [굴 200g + 소금물 200g] 소분 후 얼음물 바트 보관"
+        ],
+        "steps": ["마감 시 얼음물 교체 필수"],
+        "caution": "패각 및 갯지렁이 혼입 주의"
+    },
+    "점심 기본반찬 4종 대량조리": {
+        "category": "반찬/국",
+        "updated": "26.04.30 / 25.12.17 수정",
+        "summary": "어묵볶음·콩나물무침·소세지볶음·콩나물국 대량 표준 레시피",
+        "specs": [
+            "콩나물국: 물 12L + 해물농축액 500ml + 콩나물 1kg (끓기 전 염도 0.65 ➔ 끓인 후 염도 0.85)"
+        ],
+        "steps": ["점심 예상 매출에 맞춰 조리량 조절하여 잔반 최소화"],
+        "caution": "콩나물국 염도 준수"
+    }
+}
+
+# ==============================================================================
+# 3. REAL-TIME EXCEL ENGINE (FIXES FORMULA CACHE SHIFT)
+# ==============================================================================
 @st.cache_data
-def load_data():
+def load_and_recalculate_all():
     candidates = [
-        "cost_data.xlsx",
         "손정보쌈_원가계산_가나다순정리_소분카드정렬_판매가반영.xlsx",
-        "손정보쌈_원가계산_레시피입력완성.xlsx",
-        "손정보쌈_원가계산_보완매뉴얼반영-v2.xlsx"
+        "손정보쌈_원가계산_가나다순정리_소분카드정렬_판매가반영_2.xlsx",
+        "손정보쌈_원가계산_레시피입력완성.xlsx"
     ]
-    file_path = next((c for c in candidates if os.path.exists(c)), candidates[0])
-    wb = openpyxl.load_workbook(file_path, data_only=False)
-    ws1, ws2, ws3, ws4 = wb["01_식재료마스터DB"], wb["02_소분및배합레시피"], wb["03_메뉴별원가계산서"], wb["04_수익률및마진분석"]
+    file_path = next((c for c in candidates if os.path.exists(c)), None)
+    if file_path is None:
+        st.error("엑셀 데이터 파일을 찾을 수 없습니다. 폴더 내 엑셀 파일명을 확인해 주세요.")
+        st.stop()
 
-    unit_cost_map = {}
-    for r in range(5, 155):
-        name = ws1.cell(r, 3).value
-        if name:
-            w = float(ws1.cell(r, 4).value or 0)
-            p = float(ws1.cell(r, 5).value or 0)
-            y_val = ws1.cell(r, 6).value
-            y = float(y_val if y_val is not None else 1.0)
-            unit_cost_map[str(name).strip()] = (p / (w * y)) if (w * y) > 0 else 0.0
+    df_db_full = pd.read_excel(file_path, sheet_name="01_식재료마스터DB", skiprows=3)
+    df_raw = df_db_full.iloc[:150, :9].copy()
+    df_raw.columns = ["품목코드", "분류", "식재료명", "구매총중량", "구매가격", "손질수율", "실사용중량", "1g당실원가", "비고"]
+    df_raw = df_raw.dropna(subset=["식재료명"]).copy()
+    for col in ["구매총중량", "구매가격", "손질수율"]:
+        df_raw[col] = pd.to_numeric(df_raw[col], errors="coerce").fillna(0.0)
+    df_raw["손질수율"] = np.where(df_raw["손질수율"] <= 0, 1.0, df_raw["손질수율"])
+    df_raw["실사용중량"] = df_raw["구매총중량"] * df_raw["손질수율"]
+    df_raw["1g당실원가"] = np.where(df_raw["실사용중량"] > 0, df_raw["구매가격"] / df_raw["실사용중량"], 0.0)
+    df_raw["품목코드"] = [f"ING-{i+1:03d}" for i in range(len(df_raw))]
 
-    for _ in range(3):
-        for i in range(30):
-            hr = 37 + 17 * i
-            prep_name = ws2.cell(hr, 3).value
-            if not prep_name:
-                continue
-            y_val = ws2.cell(hr, 7).value
-            y = float(y_val if y_val is not None else 1.0)
-            tw, tc = 0.0, 0.0
-            for ir in range(hr + 2, hr + 14):
-                ing, qty = ws2.cell(ir, 3).value, ws2.cell(ir, 4).value
-                if ing and qty is not None:
-                    q = float(qty or 0)
-                    tw += q
-                    tc += q * unit_cost_map.get(str(ing).strip(), 0.0)
-            unit_cost_map[str(prep_name).strip()] = (tc / (tw * y)) if (tw * y) > 0 else 0.0
+    unit_cost_map = dict(zip(df_raw["식재료명"].str.strip(), df_raw["1g당실원가"]))
+    code_map = dict(zip(df_raw["식재료명"].str.strip(), df_raw["품목코드"]))
+    raw_cat_map = dict(zip(df_raw["식재료명"].str.strip(), df_raw["분류"]))
 
-    menu_rows, profit_rows = [], []
-    for i in range(20):
-        hr = 27 + 17 * i
-        m_name = ws3.cell(hr, 3).value
-        if not m_name:
+    df_sobun_sheet = pd.read_excel(file_path, sheet_name="02_소분및배합레시피")
+    sobun_list, sobun_items_dict, sobun_cat_ratios = [], {}, {}
+
+    for i in range(30):
+        start_row = 35 + i * 17
+        if start_row >= len(df_sobun_sheet):
+            break
+        s_name = df_sobun_sheet.iloc[start_row, 2]
+        if pd.isna(s_name) or str(s_name).strip() == "":
             continue
-        m_name = str(m_name).strip()
-        num_label = ws3.cell(hr, 1).value
-        cat = str(ws3.cell(hr, 2).value or "기타").strip()
-        sell_price = float(ws3.cell(hr, 6).value or 0)
-        target_rate = float(ws3.cell(hr, 8).value or 0.3)
+        s_name = str(s_name).strip()
+        s_num = f"소분 #{i+1}"
+        p_code = f"PREP-{i+1:02d}"
+        yield_rate = pd.to_numeric(df_sobun_sheet.iloc[start_row, 6], errors="coerce")
+        yield_rate = float(yield_rate) if (pd.notna(yield_rate) and yield_rate > 0) else 1.0
+        memo = str(df_sobun_sheet.iloc[start_row, 7]) if pd.notna(df_sobun_sheet.iloc[start_row, 7]) else ""
 
-        total_cost = 0.0
-        for ir in range(hr + 2, hr + 14):
-            ing, qty = ws3.cell(ir, 3).value, ws3.cell(ir, 4).value
-            if ing and qty is not None:
-                total_cost += float(qty or 0) * unit_cost_map.get(str(ing).strip(), 0.0)
+        items, total_w, total_c = [], 0.0, 0.0
+        for r in range(start_row + 2, start_row + 14):
+            ing = df_sobun_sheet.iloc[r, 2]
+            qty = pd.to_numeric(df_sobun_sheet.iloc[r, 3], errors="coerce")
+            i_memo = str(df_sobun_sheet.iloc[r, 7]) if pd.notna(df_sobun_sheet.iloc[r, 7]) else ""
+            if pd.notna(ing) and str(ing).strip() != "":
+                ing = str(ing).strip()
+                qty_val = float(qty) if pd.notna(qty) else 0.0
+                u_c = unit_cost_map.get(ing, 0.0)
+                i_c = qty_val * u_c
+                total_w += qty_val
+                total_c += i_c
+                items.append({
+                    "품목코드": code_map.get(ing, "자동연동"), "재료명": ing,
+                    "투입량(g)": qty_val, "1g단가(원)": u_c, "투입원가(원)": i_c, "메모": i_memo
+                })
+        final_w = total_w * yield_rate
+        unit_c = (total_c / final_w) if final_w > 0 else 0.0
+        for it in items:
+            it["원가비중(%)"] = (it["투입원가(원)"] / total_c * 100.0) if total_c > 0 else 0.0
 
-        cost_rate = (total_cost / sell_price) if sell_price > 0 else 0.0
-        rec_price = math.ceil((total_cost / target_rate) / 100.0) * 100 if target_rate > 0 else 0
-        qty_val = ws4.cell(6 + i, 8).value
-        monthly_qty = float(qty_val) if isinstance(qty_val, (int, float)) else 0.0
+        unit_cost_map[s_name] = unit_c
+        code_map[s_name] = p_code
 
-        menu_rows.append({
-            "번호": num_label, "카테고리": cat, "메뉴명": m_name,
-            "현재판매가": sell_price, "1인분총원가": total_cost,
-            "현재원가율": cost_rate, "1그릇당마진": sell_price - total_cost,
-            "목표원가율": target_rate, "권장판매가": rec_price
+        cat_sums = {"육류": 0.0, "해산물": 0.0, "채소/농산": 0.0, "소스/공산품": 0.0, "면/사리류": 0.0, "포장/소모품": 0.0}
+        if total_c > 0:
+            for it in items:
+                ing = it["재료명"]
+                c = it["투입원가(원)"]
+                rc = raw_cat_map.get(ing, "소스/공산품")
+                if rc not in cat_sums:
+                    rc = "소스/공산품"
+                cat_sums[rc] += c
+            sobun_cat_ratios[s_name] = {k: v / total_c for k, v in cat_sums.items()}
+        else:
+            sobun_cat_ratios[s_name] = {k: 0.0 for k in cat_sums}
+
+        sobun_list.append({
+            "소분번호": s_num, "품목코드": p_code, "소분명": s_name,
+            "총투입중량(g)": total_w, "수율(%)": yield_rate * 100.0,
+            "최종완성중량(g)": final_w, "1회배합총원가(원)": total_c,
+            "1g당실원가(원)": unit_c, "메모": memo
         })
-        profit_rows.append({
-            "번호": num_label, "메뉴명": m_name, "현재판매가": sell_price,
-            "식재료원가": total_cost, "원가율": cost_rate, "월판매수량": monthly_qty
+        sobun_items_dict[s_name] = items
+
+    df_sobun = pd.DataFrame(sobun_list)
+
+    df_menu_sheet = pd.read_excel(file_path, sheet_name="03_메뉴별원가계산서")
+    default_unconfirmed_prices = {
+        "얼큰 알곤이 칼국수 전골(2인)": 24000.0, "화산 육칼국수": 11000.0,
+        "알곤이 두부 두루치기": 22000.0, "직화 매콤 돼지불백(1인)": 10000.0, "손이가는 비빔당면": 7000.0
+    }
+
+    menu_list, menu_items_dict, menu_cat_breakdown = [], {}, {}
+    for i in range(20):
+        start_row = 25 + i * 17
+        if start_row >= len(df_menu_sheet):
+            break
+        m_num = str(df_menu_sheet.iloc[start_row, 0]).strip()
+        m_cat = str(df_menu_sheet.iloc[start_row, 1]).strip()
+        m_name = str(df_menu_sheet.iloc[start_row, 2]).strip()
+        raw_price = pd.to_numeric(df_menu_sheet.iloc[start_row, 5], errors="coerce")
+        raw_price = float(raw_price) if pd.notna(raw_price) else 0.0
+        target_rate = pd.to_numeric(df_menu_sheet.iloc[start_row, 7], errors="coerce")
+        target_rate = float(target_rate) if pd.notna(target_rate) and target_rate > 0 else 0.30
+
+        m_items, total_c = [], 0.0
+        cat_sums = {"육류": 0.0, "해산물": 0.0, "채소/농산": 0.0, "소스/공산품": 0.0, "면/사리류": 0.0, "포장/소모품": 0.0}
+
+        for r in range(start_row + 2, start_row + 14):
+            ing = df_menu_sheet.iloc[r, 2]
+            qty = pd.to_numeric(df_menu_sheet.iloc[r, 3], errors="coerce")
+            memo = str(df_menu_sheet.iloc[r, 8]) if pd.notna(df_menu_sheet.iloc[r, 8]) else ""
+            if pd.notna(ing) and str(ing).strip() != "":
+                ing = str(ing).strip()
+                u_c = unit_cost_map.get(ing, 0.0)
+                qty_val = float(qty) if (pd.notna(qty) and qty > 0) else 0.0
+                i_c = qty_val * u_c
+                total_c += i_c
+                gubun = "자체소분/소스" if ing in sobun_cat_ratios else raw_cat_map.get(ing, "기타")
+                m_items.append({
+                    "구분": gubun, "품목코드": code_map.get(ing, "-"), "재료명": ing,
+                    "투입량": qty_val, "1g단가(원)": u_c, "투입원가(원)": i_c, "메모": memo
+                })
+                if i_c > 0:
+                    rc = raw_cat_map.get(ing, "소스/공산품")
+                    if rc not in cat_sums:
+                        rc = "소스/공산품"
+                    cat_sums[rc] += i_c
+
+        for it in m_items:
+            it["원가비중(%)"] = (it["투입원가(원)"] / total_c * 100.0) if total_c > 0 else 0.0
+
+        is_confirmed = raw_price > 0
+        effective_price = raw_price if is_confirmed else default_unconfirmed_prices.get(m_name, 10000.0)
+        cost_rate = (total_c / effective_price * 100.0) if effective_price > 0 else 0.0
+        margin = effective_price - total_c
+        rec_price = np.ceil((total_c / target_rate) / 100.0) * 100.0
+
+        menu_list.append({
+            "메뉴번호": m_num, "카테고리": m_cat, "메뉴명": m_name,
+            "엑셀판매가": raw_price, "적용판매가": effective_price,
+            "판매가확정여부": "확정" if is_confirmed else "미확정",
+            "1인분총원가": total_c, "원가율(%)": cost_rate,
+            "1그릇당마진": margin, "권장판매가(30%)": rec_price
         })
+        menu_items_dict[m_name] = m_items
+        menu_cat_breakdown[m_name] = cat_sums
 
-    return pd.DataFrame(menu_rows), pd.DataFrame(profit_rows)
+    return df_raw, df_sobun, sobun_items_dict, pd.DataFrame(menu_list), menu_items_dict, menu_cat_breakdown
 
-df_menu, df_profit = load_data()
+df_raw, df_sobun, sobun_items_dict, df_menu, menu_items_dict, menu_cat_breakdown = load_and_recalculate_all()
 
+# ==============================================================================
+# 4. MOBILE APP HEADER & NAVIGATION TABS
+# ==============================================================================
 st.markdown("""
 <div class="m-header">
     <div class="m-badge">手:情 (손정) · MOBILE PORTAL</div>
-    <div class="m-title">🥩 손정보쌈 가맹점 모바일 포털</div>
-    <div class="m-sub">스마트폰 맞춤형 원가 조회 · 월간 순수익 시뮬레이터</div>
+    <div class="m-title">🥩 손정보쌈 가맹점 통합 진단 포털</div>
+    <div class="m-sub">28P 조리 보완매뉴얼 · 127종 식자재 DB · 실매출/원가 진단</div>
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.tabs(["📋 1인분 원가", "💰 순익 계산기", "📦 발주 가이드"])
+nav = st.tabs([
+    "📋 28P 매뉴얼·레시피",
+    "🥩 메뉴원가 & DB",
+    "🔍 실매출·원가 진단",
+    "💰 월간 손익 P&L"
+])
 
-with tab1:
-    selected_menu = st.selectbox("🔍 조회할 메뉴를 터치하세요", df_menu["메뉴명"].tolist())
-    row = df_menu[df_menu["메뉴명"] == selected_menu].iloc[0]
-    sell_price, unit_cost = int(row["현재판매가"]), int(round(row["1인분총원가"]))
-    cost_rate = (unit_cost / sell_price * 100) if sell_price > 0 else 0.0
-    margin = sell_price - unit_cost
+# ==============================================================================
+# TAB 1: 📋 주방 보완매뉴얼 & 1인분 레시피 통합 뷰어
+# ==============================================================================
+with nav[0]:
+    st.markdown("##### 📖 주방 보완매뉴얼 & 20종 정량 레시피")
+    sub_t1, sub_t2 = st.tabs(["📌 28P 보완매뉴얼 가이드", "🍲 20종 메뉴별 정량 레시피"])
 
-    if sell_price == 0:
-        status_txt, status_col = "⚪ 판매가 미입력", "#6E655F"
-    elif cost_rate <= 25:
-        status_txt, status_col = "🟢 우수 (25% 이하)", "#2E6F40"
-    elif cost_rate <= 30:
-        status_txt, status_col = "🟡 적정 (30% 이하)", "#B7791F"
-    else:
-        status_txt, status_col = "🔴 관리필요 (30% 초과)", "#B8332A"
-
-    st.markdown(f"""
-    <div class="m-grid-2x2">
-        <div class="m-kpi-card"><div class="m-kpi-label">현재 판매가</div><div class="m-kpi-val">{sell_price:,}원</div><div class="m-kpi-delta" style="color:#6E655F;">권장가 {int(row['권장판매가']):,}원</div></div>
-        <div class="m-kpi-card"><div class="m-kpi-label">1인분 총원가</div><div class="m-kpi-val" style="color:#8C1D18;">{unit_cost:,}원</div><div class="m-kpi-delta" style="color:#6E655F;">{row['카테고리']}</div></div>
-        <div class="m-kpi-card"><div class="m-kpi-label">현재 원가율</div><div class="m-kpi-val" style="color:{status_col};">{cost_rate:.1f}%</div><div class="m-kpi-delta" style="color:{status_col};">{status_txt}</div></div>
-        <div class="m-kpi-card"><div class="m-kpi-label">1그릇당 마진</div><div class="m-kpi-val" style="color:#2E6F40;">{margin:,}원</div><div class="m-kpi-delta" style="color:#6E655F;">판매가 - 원가</div></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("##### 📊 전체 메뉴 원가 한눈에 보기")
-    cat_filter = st.radio("분류 필터", ["전체", "점심/식사", "메인요리", "사이드/별미"], horizontal=True)
-    filtered_menu = df_menu if cat_filter == "전체" else df_menu[df_menu["카테고리"] == cat_filter]
-
-    for _, m_row in filtered_menu.iterrows():
-        p_val, c_val = int(m_row["현재판매가"]), int(round(m_row["1인분총원가"]))
-        r_val = (c_val / p_val * 100) if p_val > 0 else 0.0
-        mg_val = p_val - c_val
-        if p_val == 0:
-            pill_txt, pill_col, pill_bg = "판매가 확인필요", "#6E655F", "#EFECE6"
-        elif r_val <= 25:
-            pill_txt, pill_col, pill_bg = f"🟢 우수 {r_val:.1f}%", "#2E6F40", "#E8F5E9"
-        elif r_val <= 30:
-            pill_txt, pill_col, pill_bg = f"🟡 적정 {r_val:.1f}%", "#B7791F", "#FEF3C7"
-        else:
-            pill_txt, pill_col, pill_bg = f"🔴 주의 {r_val:.1f}%", "#B8332A", "#FEE2E2"
-
+    with sub_t1:
+        sel_k = st.selectbox("조회할 조리·전처리 항목 선택", list(MANUAL_DB.keys()))
+        m_data = MANUAL_DB[sel_k]
         st.markdown(f"""
-        <div class="m-list-card">
-            <div class="m-list-top"><div class="m-menu-name">{m_row['메뉴명']}</div><span class="m-status-pill" style="color:{pill_col}; background:{pill_bg};">{pill_txt}</span></div>
-            <div class="m-list-bottom"><span>판매가 <b>{p_val:,}원</b></span><span>원가 <b style="color:#8C1D18;">{c_val:,}원</b></span><span>마진 <b style="color:#2E6F40;">{mg_val:,}원</b></span></div>
+        <div class="sj-card-gold">
+            <span class="sj-tag">{m_data['category']}</span>
+            <span class="sj-tag">{m_data['updated']}</span>
+            <h4 style="margin:8px 0 4px 0;">{sel_k}</h4>
+            <p style="color:#5C4938; font-size:13px; margin-bottom:0;">{m_data['summary']}</p>
         </div>
         """, unsafe_allow_html=True)
 
-with tab2:
-    st.markdown("##### 1️⃣ 수수료율 및 메뉴별 월 판매량 입력")
-    comm_pct = st.slider("평균 결제/배달 수수료율 일괄 적용 (%)", 0.0, 30.0, 6.5, 0.5)
-    mobile_sim_df = pd.DataFrame({
-        "메뉴명": df_profit["메뉴명"],
-        "현재판매가": df_profit["현재판매가"].astype(int),
-        "식재료원가": df_profit["식재료원가"].round(0).astype(int),
-        "월판매수량": df_profit["월판매수량"].astype(int)
+        st.markdown("###### ⚖️ 핵심 정량 · 배합 · 염도")
+        for s in m_data["specs"]:
+            st.markdown(f"- {s}")
+
+        st.markdown("###### ⏱️ 표준 조리 타임라인")
+        for idx, st_txt in enumerate(m_data["steps"]):
+            st.markdown(f"""<div style='padding:8px 10px; background:#FFF; border-radius:8px; margin-bottom:6px; border:1px solid #E6DEC8; font-size:12.5px;'>{st_txt}</div>""", unsafe_allow_html=True)
+
+        st.markdown(f"""
+        <div class="sj-card-alert" style="font-size:12.5px;">
+            <b>⚠️ QSC 주의사항:</b> {m_data['caution']}
+        </div>
+        """, unsafe_allow_html=True)
+
+    with sub_t2:
+        chosen_menu = st.selectbox("조회할 메뉴 선택", df_menu["메뉴명"].tolist())
+        m_row = df_menu[df_menu["메뉴명"] == chosen_menu].iloc[0]
+        st.markdown(f"""
+        <div class="sj-card-gold">
+            <b style="font-size:16px;">{chosen_menu}</b> ({m_row['카테고리']})<br>
+            판매가: <b>{int(m_row['적용판매가']):,}원</b> | 1인분 총원가: <b style="color:#8C1D18;">{int(m_row['1인분총원가']):,}원 ({m_row['원가율(%)']:.1f}%)</b>
+        </div>
+        """, unsafe_allow_html=True)
+
+        for it in menu_items_dict[chosen_menu]:
+            share = it["원가비중(%)"]
+            qty_str = f"{it['투입량']:,.0f}g(개)" if it["투입량"] > 0 else "중량 확인필요"
+            cost_str = f"{it['투입원가(원)']:,.0f}원 ({share:.1f}%)" if it["투입원가(원)"] > 0 else "0원"
+            st.markdown(f"""
+            <div class="sj-card" style="padding:10px 14px; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                    <div><span class="sj-tag">{it['구분']}</span> <b>{it['재료명']}</b></div>
+                    <div style="text-align:right;"><b>{qty_str}</b> | <b style="color:#8C1D18;">{cost_str}</b></div>
+                </div>
+                <div class="sj-prog-bg"><div class="sj-prog-fill" style="width:{min(share, 100):.1f}%;"></div></div>
+            </div>
+            """, unsafe_allow_html=True)
+
+# ==============================================================================
+# TAB 2: 🥩 메뉴원가율 & 식자재 DB
+# ==============================================================================
+with nav[1]:
+    st.markdown("##### 🥩 20종 메뉴 원가율 신호등 & 127종 식자재 DB")
+    for _, row in df_menu.iterrows():
+        r_pct = row["원가율(%)"]
+        status_color = "#2E6F40" if r_pct <= 25 else ("#CB994F" if r_pct <= 30 else "#B8332A")
+        status_text = "🟢 우수" if r_pct <= 25 else ("🟡 적정" if r_pct <= 30 else "🔴 주의")
+        st.markdown(f"""
+        <div class="sj-card" style="padding:10px 14px; margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:13.5px;">
+                <div><span class="sj-tag">{row['메뉴번호']}</span> <b>{row['메뉴명']}</b></div>
+                <b style="color:{status_color};">{status_text} ({r_pct:.1f}%)</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:#5C4938; margin-top:4px;">
+                <span>판매가: {int(row['적용판매가']):,}원</span>
+                <span>원가: <b style="color:#8C1D18;">{int(row['1인분총원가']):,}원</b></span>
+                <span>마진: <b style="color:#2E6F40;">{int(row['1그릇당마진']):,}원</b></span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ==============================================================================
+# TAB 3: 🔍 실제 매출·원가 차이(Variance) 정밀 진단기
+# ==============================================================================
+with nav[2]:
+    st.markdown("##### 🔍 당월 실제 매출 vs 실사용 원가 누수 진단")
+    st.caption("가맹점에서 판매된 총매출과 물류업체 매입 + 개인 사입(마트/시장) 금액을 대조하여 원가 누수 부위를 색출합니다.")
+
+    default_sales_qty = [380, 140, 260, 220, 45, 0, 190, 0, 0, 0, 160, 110, 85, 130, 65, 90, 120, 95, 150, 110]
+    pos_df = pd.DataFrame({
+        "메뉴명": df_menu["메뉴명"],
+        "실판매가(원)": df_menu["적용판매가"].astype(int),
+        "표준원가(원)": df_menu["1인분총원가"].round(0).astype(int),
+        "월판매수량": default_sales_qty
     })
 
-    user_edited = st.data_editor(
-        mobile_sim_df[["메뉴명", "현재판매가", "월판매수량"]],
-        column_config={
-            "메뉴명": st.column_config.TextColumn("메뉴명", disabled=True),
-            "현재판매가": st.column_config.NumberColumn("판매가", format="%d원", disabled=True),
-            "월판매수량": st.column_config.NumberColumn("월 판매량(그릇)", min_value=0, step=10, format="%d개")
-        },
-        hide_index=True, use_container_width=True, height=735
-    )
+    with st.expander("📦 당월 메뉴별 판매 수량 수정 (터치하여 열기)", expanded=False):
+        edited_pos = st.data_editor(
+            pos_df[["메뉴명", "월판매수량"]],
+            column_config={"메뉴명": st.column_config.TextColumn("메뉴명", disabled=True)},
+            hide_index=True, use_container_width=True, height=250
+        )
+    pos_df["월판매수량"] = edited_pos["월판매수량"]
 
-    total_revenue = float((user_edited["현재판매가"] * user_edited["월판매수량"]).sum())
-    total_cost = float((mobile_sim_df["식재료원가"] * user_edited["월판매수량"]).sum())
-    total_comm = total_revenue * (comm_pct / 100.0)
-    gross_profit = total_revenue - total_cost - total_comm
-    avg_cost_rate = (total_cost / total_revenue * 100.0) if total_revenue > 0 else 0.0
+    food_rev = float((pos_df["실판매가(원)"] * pos_df["월판매수량"]).sum())
+    bev_rev = 5000 * 650 + 5000 * 420 + 5000 * 120 + 2000 * 350
+    total_actual_rev = food_rev + bev_rev
 
-    st.markdown("##### 2️⃣ 매장 월 고정비 설정")
-    with st.expander("⚙️ 월 고정비 9개 항목 상세 수정 (터치하여 열기)", expanded=False):
-        f1 = st.number_input("1. 임대료 및 관리비", value=550000, step=50000, format="%d")
-        f2 = st.number_input("2. 인건비", value=3200000, step=100000, format="%d")
-        f3 = st.number_input("3. 수도 / 광열비", value=300000, step=50000, format="%d")
-        f4 = st.number_input("4. 기타 고정비", value=150000, step=20000, format="%d")
-        f5 = st.number_input("5. 예비비 / 소모품", value=100000, step=20000, format="%d")
-        f6 = st.number_input("6. 렌탈비용", value=50000, step=10000, format="%d")
-        f7 = st.number_input("7. 대출 이자", value=30000, step=10000, format="%d")
-        f8 = st.number_input("8. 보험료", value=50000, step=10000, format="%d")
-        f9 = st.number_input("9. 부대비용 (4대보험 등)", value=500000, step=50000, format="%d")
+    theo_cat_totals = {"육류": 0.0, "해산물": 0.0, "채소/농산": 0.0, "소스/공산품": 0.0, "면/사리류": 0.0, "주류/음료": 1350*650 + 1650*420 + 1500*120 + 650*350, "포장/소모품": 0.0}
+    for _, r_pos in pos_df.iterrows():
+        qty = float(r_pos["월판매수량"])
+        if qty <= 0:
+            continue
+        c_map = menu_cat_breakdown.get(r_pos["메뉴명"], {})
+        for k in ["육류", "해산물", "채소/농산", "소스/공산품", "면/사리류"]:
+            theo_cat_totals[k] += c_map.get(k, 0.0) * qty
+    theo_cat_totals["포장/소모품"] += food_rev * 0.022
+    total_theo_cost = sum(theo_cat_totals.values())
 
-    total_fixed = f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9
-    net_profit = gross_profit - total_fixed
-    net_rate = (net_profit / total_revenue * 100.0) if total_revenue > 0 else 0.0
+    with st.expander("🛒 품목군별 실제 매입액(물류+개인사입) 입력 (터치하여 열기)", expanded=False):
+        spend_input_df = pd.DataFrame({
+            "품목군": list(theo_cat_totals.keys()),
+            "물류업체매입(원)": [int(v*1.08) for v in theo_cat_totals.values()],
+            "개인사입(원)": [150000, 120000, 680000, 90000, 30000, 40000, 240000]
+        })
+        edited_spend = st.data_editor(spend_input_df, hide_index=True, use_container_width=True)
 
-    st.info(f"💡 현재 적용된 **월 고정비 총합계: {int(total_fixed):,}원** (위 버튼을 눌러 수정 가능)")
-    np_color = "#2E6F40" if net_profit > 0 else "#B8332A"
-    np_status = f"🟢 흑자 ({net_rate:.1f}%)" if net_profit > 0 else "🔴 적자 주의"
+    edited_spend["실제사용"] = edited_spend["물류업체매입(원)"] + edited_spend["개인사입(원)"]
+    total_actual_cost = float(edited_spend["실제사용"].sum())
+    total_variance = total_actual_cost - total_theo_cost
+
+    st.session_state["sim_actual_rev"] = total_actual_rev
+    st.session_state["sim_actual_cost"] = total_actual_cost
+    st.session_state["sim_theo_cost"] = total_theo_cost
 
     st.markdown(f"""
-    <div class="m-grid-2x2">
-        <div class="m-kpi-card"><div class="m-kpi-label">월 예상 총매출액</div><div class="m-kpi-val">{int(total_revenue):,}원</div><div class="m-kpi-delta" style="color:#6E655F;">수수료 {int(total_comm):,}원</div></div>
-        <div class="m-kpi-card"><div class="m-kpi-label">월 식재료 원가 합계</div><div class="m-kpi-val" style="color:#8C1D18;">{int(total_cost):,}원</div><div class="m-kpi-delta" style="color:#8C1D18;">평균 원가율 {avg_cost_rate:.1f}%</div></div>
-        <div class="m-kpi-card"><div class="m-kpi-label">매장 매출총이익</div><div class="m-kpi-val">{int(gross_profit):,}원</div><div class="m-kpi-delta" style="color:#6E655F;">고정비 {int(total_fixed):,}원</div></div>
-        <div class="m-kpi-card" style="border-top: 3px solid {np_color}; background:#FFFDF9;"><div class="m-kpi-label">💰 월 최종 세전 순수익</div><div class="m-kpi-val" style="color:{np_color};">{int(net_profit):,}원</div><div class="m-kpi-delta" style="color:{np_color};">{np_status}</div></div>
+    <div class="sj-card-gold" style="margin-top:10px;">
+        <h4 style="margin:0 0 6px 0; color:#8C1D18;">🔍 당월 실매출·원가 진단 요약</h4>
+        <div style="font-size:13px; line-height:1.6;">
+        - 총매출 (음식+주류): <b>{int(total_actual_rev):,}원</b><br>
+        - POS 표준원가: <b>{int(total_theo_cost):,}원</b> ({(total_theo_cost/total_actual_rev*100):.1f}%)<br>
+        - 실제 사용원가: <b style="color:#8C1D18;">{int(total_actual_cost):,}원</b> ({(total_actual_cost/total_actual_rev*100):.1f}%)<br>
+        - <b>원가 누수 차액: <span style="color:#B8332A;">{int(total_variance):+,}원</span></b>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-with tab3:
-    st.markdown("##### 📦 본사 필수 전용상품 발주 및 권장 재고 안내")
-    scm_items = [
-        {"품목명": "가브리살 (정형 원육)", "공급형태": "본사필수", "포장규격": "1Box (10kg)", "최소발주수량": "1Box", "권장안전재고": "3Box"},
-        {"품목명": "손정 보쌈/볶음 분말소스", "공급형태": "본사필수", "포장규격": "1Box (1kg×6팩)", "최소발주수량": "1Box", "권장안전재고": "2Box"},
-        {"품목명": "진한 백사골육수 / 해물농축액", "공급형태": "본사필수", "포장규격": "1Box (2kg×5팩)", "최소발주수량": "1Box", "권장안전재고": "2Box"},
-        {"품목명": "무보쌈김치 / 지니김치양념", "공급형태": "본사필수", "포장규격": "1Box (5kg×2팩)", "최소발주수량": "1Box", "권장안전재고": "2Box"},
-        {"품목명": "손정 전용 포장용기", "공급형태": "본사필수", "포장규격": "1Box (1,000개입)", "최소발주수량": "1Box", "권장안전재고": "2Box"},
-    ]
-    for item in scm_items:
-        st.markdown(f"""
-        <div class="m-list-card">
-            <div class="m-list-top"><div class="m-menu-name">{item['품목명']}</div><span class="m-status-pill" style="color:#8C1D18; background:#FEE2E2;">{item['공급형태']}</span></div>
-            <div class="m-list-bottom"><span>규격: <b>{item['포장규격']}</b></span><span>최소주문: <b>{item['최소발주수량']}</b></span><span>권장재고: <b style="color:#2E6F40;">{item['권장안전재고']}</b></span></div>
+# ==============================================================================
+# TAB 4: 💰 월간 손익 P&L 시뮬레이터
+# ==============================================================================
+with nav[3]:
+    st.markdown("##### 💰 가맹점 월간 P&L 순수익 시뮬레이터")
+    def_rev = int(st.session_state.get("sim_actual_rev", 45000000))
+    def_cost = int(st.session_state.get("sim_actual_cost", 13200000))
+
+    m_rev = st.number_input("당월 총매출액 (원)", value=def_rev, step=500000)
+    m_cost = st.number_input("당월 총 식자재·주류 원가 (원)", value=def_cost, step=100000)
+    comm_rate = st.slider("배달/결제 수수료율 (%)", 0.0, 20.0, 6.5, 0.5)
+    m_comm = m_rev * (comm_rate / 100.0)
+
+    st.markdown("###### ⚙️ 월 고정비 설정")
+    f_rent = st.number_input("월 임대료/관리비", value=2200000, step=100000)
+    f_labor = st.number_input("월 인건비 총액", value=8500000, step=200000)
+    f_util = st.number_input("수도광열비", value=950000, step=50000)
+    f_etc = st.number_input("기타 고정비", value=650000, step=50000)
+
+    total_fixed = f_rent + f_labor + f_util + f_etc
+    gross_p = m_rev - m_cost - m_comm
+    net_p = gross_p - total_fixed
+    net_rate = (net_p / m_rev * 100.0) if m_rev > 0 else 0.0
+    np_col = "#2E6F40" if net_p > 0 else "#B8332A"
+
+    st.markdown(f"""
+    <div class="m-grid-2x2" style="margin-top:10px;">
+        <div class="m-kpi-card"><div class="m-kpi-label">월 총매출액</div><div class="m-kpi-val">{int(m_rev):,}원</div></div>
+        <div class="m-kpi-card"><div class="m-kpi-label">식자재원가+수수료</div><div class="m-kpi-val" style="color:#8C1D18;">{int(m_cost+m_comm):,}원</div></div>
+        <div class="m-kpi-card"><div class="m-kpi-label">월 고정비 합계</div><div class="m-kpi-val">{int(total_fixed):,}원</div></div>
+        <div class="m-kpi-card" style="border-top: 3px solid {np_col}; background:#FFFDF9;">
+            <div class="m-kpi-label">💰 월 최종 순수익</div>
+            <div class="m-kpi-val" style="color:{np_col};">{int(net_p):,}원</div>
+            <div class="m-kpi-delta" style="color:{np_col};">순이익률 {net_rate:.1f}%</div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 # --- END OF FILE ---
